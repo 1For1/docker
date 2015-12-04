@@ -1,0 +1,39 @@
+# Kafka
+zookeeper:
+  image: wurstmeister/zookeeper:latest
+  ports:
+    - "2181"
+
+# docker-compose scale kafka=3
+kafka:
+  image: wurstmeister/kafka:latest
+  ports:
+    - "9092"
+  links:
+    - zookeeper:zk
+    - redis:redis
+  environment:
+#    KAFKA_ADVERTISED_HOST_NAME: 192.168.0.223
+    KAFKA_CREATE_TOPICS: "logstash:1:1"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+# python-utils
+python-utils:
+  image: oneforone/python-utils
+  command: ./run_script.sh --file
+  links:
+    - redis:redis
+    - mongo:mongo # the host mongo will be added to image
+
+# Redis
+redis:
+  image: redis:3.0
+
+# Mongo
+mongo:
+  image: mongo:3.2
+  volumes:
+    - /var/docker-data/mongo:/data/db
+  ports:
+    - 27017
